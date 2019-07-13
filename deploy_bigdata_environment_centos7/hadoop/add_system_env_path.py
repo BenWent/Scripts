@@ -4,8 +4,8 @@ import os
 import commands
 
 # 安装open-jdk
-os.system('yum -y install java-1.7.0-openjdk')
-os.system('yum -y install java-1.7.0-openjdk-devel')
+# os.system('yum -y install java-1.7.0-openjdk')
+os.system('yum -y install java-1.8.0-openjdk-devel')
 java_link_path = commands.getoutput('ls -l /etc/alternatives/java')
 java_home = java_link_path.split('->')[1][:-13]
 java_home = java_home.strip()
