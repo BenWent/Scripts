@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 10:44:49
+# @Last Modified time: 2019-07-13 14:50:11
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -41,15 +41,6 @@ with open('/etc/hosts', mode='r') as file:
         if ip == m_ip:
             continue
 
-        # 将配置好的hadoop进行分发
-        transport = paramiko.Transport((ip, 22))
-        transport.connect(username='root', password=root_password)
-        client = paramiko.SFTPClient.from_transport(transport)
-
-        client.put(local_path, remote_path)
-
-        transport.close()
-
         # 创建ssh对象
         ssh = paramiko.SSHClient()
         # 允许连接不在know_hosts文件中的主机
@@ -58,12 +49,25 @@ with open('/etc/hosts', mode='r') as file:
         ssh.connect(hostname=ip, port=22, username='root',
                     password=root_password)
 
+        # 将配置好的hadoop发送到slave机器
+        sftp = ssh.open_sftp()
+        sftp.put(local_path, remote_path)
+
         # 解压缩
-        ssh.exec_command(
-            'tar -zxf {remote_path} -C /opt'.format(remote_path=remote_path))
-        ssh.exec_command('mv /opt/opt/hadoop-2.8.5 /opt')
-        ssh.exec_command('rm -fr /opt/opt')
-        ssh.exec_command('chown -R hadoop /opt/hadoop-2.8.5')
+        stdin, stdout, stderr = ssh.exec_command(
+            'tar -zxf {remote_path} -C /tmp'.format(remote_path=remote_path))
+        stdout.channel.recv_exit_status()  # 阻塞直到 exec_command 命令执行完毕
+
+        _, stdout, _ = ssh.exec_command('mv /tmp/opt/hadoop-2.8.5 /opt')
+        stdout.channel.recv_exit_status()
+
+        _, stdout, _ = ssh.exec_command('chown -R hadoop /opt/hadoop-2.8.5')
+        stdout.channel.recv_exit_status()
+
+        # 删除文件
+        _, stdout, _ = ssh.exec_command('rm -fr /tmp/opt')
+        stdout.channel.recv_exit_status()
+        sftp.remove(remote_path)
 
         # 退出ssh连接
         ssh.close()
