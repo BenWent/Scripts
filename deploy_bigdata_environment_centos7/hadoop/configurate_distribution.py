@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 14:50:11
+# @Last Modified time: 2019-07-13 15:40:06
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -52,6 +52,10 @@ with open('/etc/hosts', mode='r') as file:
         # 将配置好的hadoop发送到slave机器
         sftp = ssh.open_sftp()
         sftp.put(local_path, remote_path)
+
+        # 删除原来的配置
+        _, stdout, _ = ssh.exec_command('rm -fr /opt/hadoop-2.8.5')
+        stdout.channel.recv_exit_status()
 
         # 解压缩
         stdin, stdout, stderr = ssh.exec_command(
