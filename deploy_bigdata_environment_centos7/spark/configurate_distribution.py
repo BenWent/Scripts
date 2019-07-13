@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 21:41:04
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 19:55:05
+# @Last Modified time: 2019-07-13 20:07:21
 # @Description:        deploy the environment of spark based on the environment of hadoop
 
 import os
@@ -22,7 +22,7 @@ spark_home = commands.getoutput('echo ${SPARK_HOME}')
 # spark_name = spark_home.split('/')[-1]
 spark_name = os.path.basename(spark_home)
 spark_top_dir = spark_home.split('/')[0]
-spark_installaztion = os.path.dirname(spark_home)
+spark_installation = os.path.dirname(spark_home)
 
 # 待上传文件的位置
 local_path = '/tmp/{spark_name}.tgz'.format(spark_name=spark_name)
@@ -76,7 +76,7 @@ with open('/etc/hosts', mode='r') as file:
         stdout.channel.recv_exit_status()  # 阻塞直到 exec_command 命令执行完毕
 
         _, stdout, _ = ssh.exec_command(
-            'mv /tmp/{spark_home} {spark_installaztion}'.format(spark_home=spark_home, spark_installaztion=spark_installaztion))
+            'mv /tmp/{spark_home} {spark_installation}'.format(spark_home=spark_home, spark_installation=spark_installation))
         stdout.channel.recv_exit_status()
 
         _, stdout, _ = ssh.exec_command(

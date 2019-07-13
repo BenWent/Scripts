@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 19:42:31
+# @Last Modified time: 2019-07-13 20:06:58
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -17,7 +17,7 @@ hadoop_home = commands.getoutput('echo ${HADOOP_HOME}')
 # hadoop_name = hadoop_home.split('/')[-1]
 hadoop_name = os.path.basename(hadoop_home)
 hadoop_top_dir = hadoop_home.split('/')[0]
-hadoop_installaztion = os.path.dirname(hadoop_home)
+hadoop_installation = os.path.dirname(hadoop_home)
 
 # 待上传文件的位置
 local_path = '/tmp/{hadoop_name}.tar.gz'.format(hadoop_name=hadoop_name)
@@ -70,7 +70,7 @@ with open('/etc/hosts', mode='r') as file:
         stdout.channel.recv_exit_status()  # 阻塞直到 exec_command 命令执行完毕
 
         _, stdout, _ = ssh.exec_command(
-            'mv /tmp/{hadoop_home} {hadoop_installaztion}'.format(hadoop_home=hadoop_home, hadoop_installaztion=hadoop_installaztion))
+            'mv /tmp/{hadoop_home} {hadoop_installation}'.format(hadoop_home=hadoop_home, hadoop_installation=hadoop_installation))
         stdout.channel.recv_exit_status()
 
         _, stdout, _ = ssh.exec_command(
