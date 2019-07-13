@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 10:35:12
+# @Last Modified time: 2019-07-13 10:40:21
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -11,10 +11,16 @@ import socket
 import paramiko
 import getpass
 
+# 待上传文件的位置
+local_path = r'/tmp/hadoop-2.8.5.tar.gz'
+# 文件的上传位置，需要指定文件上传后的文件名
+remote_path = r'/tmp/hadoop-2.8.5.tar.gz'
+
 # 删除原有的hadoop包
-os.system('rm -f /tmp/hadoop-2.8.5.tar.gz')
+os.system('rm -f {local_path}'.format(local_path=local_path))
 # 对配置好的hadoop重新进行进行打包
-os.system('tar -zcf  /tmp/hadoop-2.8.5.tar.gz /opt/hadoop-2.8.5')
+os.system(
+    'tar -zcf  {local_path} /opt/hadoop-2.8.5'.format(local_path=local_path))
 
 # 获取本机ip
 hostname = socket.gethostname()
@@ -22,10 +28,6 @@ m_ip = socket.gethostbyname(hostname)
 
 # 集群中各台机器的root密码
 root_password = getpass.getpass('root password: ')
-# 待上传文件的位置
-local_path = r'/tmp/hadoop-2.8.5.tar.gz'
-# 文件的上传位置，需要指定文件上传后的文件名
-remote_path = r'/tmp/hadoop-2.8.5.tar.gz'
 
 with open('/etc/hosts', mode='r') as file:
     for line in file:
