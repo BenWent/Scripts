@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 10:40:21
+# @Last Modified time: 2019-07-13 10:44:49
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -67,7 +67,6 @@ with open('/etc/hosts', mode='r') as file:
 
         # 退出ssh连接
         ssh.close()
-        break
 
 # 参考：
 # 1、Python paramik：https://blog.csdn.net/u012881331/article/details/82881053
