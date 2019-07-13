@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 10:32:48
+# @Last Modified time: 2019-07-13 10:35:12
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -57,7 +57,8 @@ with open('/etc/hosts', mode='r') as file:
                     password=root_password)
 
         # 解压缩
-        ssh.exec_command('tar -zxf /tmp/hadoop-2.8.5.tar.gz -C /opt')
+        ssh.exec_command(
+            'tar -zxf {remote_path} -C /opt'.format(remote_path=remote_path))
         ssh.exec_command('mv /opt/opt/hadoop-2.8.5 /opt')
         ssh.exec_command('rm -fr /opt/opt')
         ssh.exec_command('chown -R hadoop /opt/hadoop-2.8.5')
