@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-14 18:33:43
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-14 18:42:30
+# @Last Modified time: 2019-07-14 19:21:49
 # @Description: 	   移除所以集群指定用户以及该用户间的免密码登录
 
 import paramiko
