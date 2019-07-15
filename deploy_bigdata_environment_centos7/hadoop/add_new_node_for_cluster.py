@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-13 16:49:33
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-15 21:42:04
+# @Last Modified time: 2019-07-15 22:23:57
 # @Description:        向hadoop集群中添加新的节点
 
 import os
@@ -230,9 +230,11 @@ if __name__ == '__main__':
         stdout.channel.recv_exit_status()
         # 删除临时文件
         sftp.remove('/tmp/hosts.tmp')
-        os.system('rm -f ./hosts.tmp')
 
         client.close()
+
+    # 删除运行节点创建的hosts.tmp文件
+    os.system('rm -f ./hosts.tmp')
 
     # 新增节点与集群节点间SSH互信
     with open('/etc/hosts', mode='r') as file:
