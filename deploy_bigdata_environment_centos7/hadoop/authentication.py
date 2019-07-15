@@ -10,7 +10,7 @@ import time
 
 # 以该用户名作为互信登录的用户名
 # user = 'hadoop'
-user = input('new user:')
+user = input('new user:')  # 注意在linux运行，输入字符串时，需要明确地输入引号。如'ok',而不能是ok
 # 以该密码作为互信登录用户的密码
 # password = '123456'
 password = getpass.getpass('new user password:')
@@ -19,7 +19,7 @@ encrypted_password = crypt.crypt(password, str(random.randint(0, 9999)))
 # root用户密码
 root_password = getpass.getpass('root password:')
 
-# 新建用户并生成密钥
+# 新建用户并生成密钥，关闭防火墙
 with open('/etc/hosts', mode='r') as file:
     for line in file:
         ip_name = line.strip().split()
@@ -50,19 +50,22 @@ with open('/etc/hosts', mode='r') as file:
             sftp = client.open_sftp()
             sftp.stat('/home/{user}/.ssh/id_rsa'.format(user=user))
         except IOError:  # user用户没有执行过ssh-keygen命令
-            # -f指定将生成的密钥放到哪个文件，-N，指定 password phrase
-            client.exec_command('mkdir -p ~/.ssh')
+            # -f指定将生成的密钥放到哪个文件，-N，指定 password phrase，以format的形式输入''的原因直接输入''，会被linux解析为空串，从而导致命令执行错误
             _, stdout, _ = client.exec_command(
                 'su {user} -c "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N {phrase}"\n'.format(user=user, phrase="\'\'"))
             stdout.channel.recv_exit_status()
+            # print(stdout.read())
 
-            print(stdout.read())
+            # _, stdout, _ = client.exec_command(
+            #    'su {user} -c "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''"\n'.format(user=user))
+            # 上面的语句在linux上执行后被解析为： su {user} -c "ssh-keygen -t rsa -f
+            # ~/.ssh/id_rsa -N "
 
         # 关闭防火墙
         _, stdout, _ = client.exec_command('systemctl stop firewalld')
         stdout.channel.recv_exit_status()
 
-        # 关闭连接
+        # 关闭ssh连接
         client.close()
 
 # 节点机器间SSH互信
@@ -97,23 +100,23 @@ with open('/etc/hosts', mode='r') as file:
                 while not channel.recv_ready():
                     time.sleep(0.1)
 
-                # 等待对方发送完全的信息
+                # 等待对方发送全部信息
                 time.sleep(2)
                 resp = channel.recv(9999)
-                if resp.find('?') != -1:  # ip指定的机器没有加入到  ~/.ssh/known_hosts 文件中
+                if resp.find('?') != -1:  # 如果出现Are you sure you want to continue connecting (yes/no)?，将指定的ip的认证添加到  ~/.ssh/known_hosts 文件中
                     channel.send('yes\n')
                     while not channel.recv_ready:
                         time.sleep(0.1)
 
                     time.sleep(2)
                     resp = channel.recv(9999)
-                # print(resp)
-                if resp.find('password:') != -1:  # 如果出现了 password:，需要输入该台机器的密码
+                print(resp)
+                if resp.find('password:') != -1:  # 如果出现了 password:，输入该台机器的密码
                     channel.send('%s\n' % password)
                     while not channel.recv_ready():  # 确保的密码输入
                         time.sleep(0.1)
+                time.sleep(1)
 
-                time.sleep(2)
         client.close()
 
 
