@@ -110,7 +110,7 @@ with open('/etc/hosts', mode='r') as file:
 
                     time.sleep(2)
                     resp = channel.recv(9999)
-                print(resp)
+                # print(resp)
                 if resp.find('password:') != -1:  # 如果出现了 password:，输入该台机器的密码
                     channel.send('%s\n' % password)
                     while not channel.recv_ready():  # 确保的密码输入
