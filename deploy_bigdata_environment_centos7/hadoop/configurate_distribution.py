@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-13 20:06:58
+# @Last Modified time: 2019-07-15 16:33:48
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -16,7 +16,7 @@ import commands
 hadoop_home = commands.getoutput('echo ${HADOOP_HOME}')
 # hadoop_name = hadoop_home.split('/')[-1]
 hadoop_name = os.path.basename(hadoop_home)
-hadoop_top_dir = hadoop_home.split('/')[0]
+hadoop_top_dir = hadoop_home.split('/')[1]  # 注意：linux的根目录是/，所以 [0]是空
 hadoop_installation = os.path.dirname(hadoop_home)
 
 # 待上传文件的位置
