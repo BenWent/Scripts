@@ -7,6 +7,7 @@ import getpass
 import crypt
 import random
 import time
+import socket
 
 # 以该用户名作为互信登录的用户名
 # user = 'hadoop'
@@ -19,6 +20,10 @@ encrypted_password = crypt.crypt(password, str(random.randint(0, 9999)))
 # root用户密码
 root_password = getpass.getpass('root password:')
 
+# 获取本机ip
+hostname = socket.gethostname()
+m_ip = socket.gethostbyname(hostname)
+
 # 新建用户并生成密钥，关闭防火墙
 with open('/etc/hosts', mode='r') as file:
     for line in file:
@@ -28,6 +33,7 @@ with open('/etc/hosts', mode='r') as file:
             continue
 
         ip = ip_name[0]
+        name = ip_name[1]
 
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -68,6 +74,10 @@ with open('/etc/hosts', mode='r') as file:
         # 关闭ssh连接
         client.close()
 
+        # 将集群中所有节点的ip与hostname的映射关系暂存到/tmp/hosts.tmp文件中
+        os.system("echo -e '{machine_ip}\t{machine_name}' >> /tmp/hosts.tmp".format(
+            machine_ip=ip, machine_name=name))
+
 # 节点机器间SSH互信
 with open('/etc/hosts', mode='r') as file:
     for line in file:
@@ -83,6 +93,15 @@ with open('/etc/hosts', mode='r') as file:
         # 以root用户登录
         client.connect(hostname=ip, port=22, username=user,
                        password=password)
+
+        # 将/tmp/hosts.tmp文件分发到集群中其它节点中，并将其写入到对方的/etc/hosts文件中
+        if m_ip != ip:
+            sftp = client.open_sftp()
+            sftp.put('/tmp/hosts.tmp', '/tmp/hosts.tmp')
+
+            _, stdout, _ = client.exec_command(
+                'cat /tmp/hosts.tmp >> /etc/hosts')
+            stdout.channel.recv_exit_status()
 
         with open('/etc/hosts', mode='r') as _file:
             for _line in _file:
@@ -103,7 +122,8 @@ with open('/etc/hosts', mode='r') as file:
                 # 等待对方发送全部信息
                 time.sleep(2)
                 resp = channel.recv(9999)
-                if resp.find('?') != -1:  # 如果出现Are you sure you want to continue connecting (yes/no)?，将指定的ip的认证添加到  ~/.ssh/known_hosts 文件中
+                # 如果出现Are you sure you want to continue connecting (yes/no)?，将指定的ip的认证添加到  ~/.ssh/known_hosts 文件中
+                if resp.find('?') != -1:
                     channel.send('yes\n')
                     while not channel.recv_ready:
                         time.sleep(0.1)
@@ -117,7 +137,13 @@ with open('/etc/hosts', mode='r') as file:
                         time.sleep(0.1)
                 time.sleep(1)
 
+        # 删除上传的临时文件
+        sftp.remove('/tmp/hosts.tmp')
+
         client.close()
+
+# 删除运行节点创建的hosts.tmp
+os.system('rm -f /tmp/hosts.tmp')
 
 
 # 参考
