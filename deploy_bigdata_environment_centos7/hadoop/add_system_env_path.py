@@ -28,7 +28,10 @@ with open('/etc/hosts', mode='r') as file:
 
         # 安装open-jdk
         # os.system('yum -y install java-1.7.0-openjdk')
-        ssh.exec_command('yum -y install java-1.8.0-openjdk-devel')
+        _, stdout, _ = ssh.exec_command(
+            'yum -y install java-1.8.0-openjdk-devel')
+        stdout.channel.recv_exit_status()
+
         java_link_path = commands.getoutput('ls -l /etc/alternatives/java')
         java_home = java_link_path.split('->')[1][:-13]
         java_home = java_home.strip()
@@ -52,7 +55,7 @@ with open('/etc/hosts', mode='r') as file:
             "echo 'export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH' >> /etc/profile")
 
         # 使配置的环境生效
-        ssh.exec_command('source /etc/profile')
+        _, stdout, _ = ssh.exec_command('source /etc/profile')
 
         # 退出ssh连接
         ssh.close()
