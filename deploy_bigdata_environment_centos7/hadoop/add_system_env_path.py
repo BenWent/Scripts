@@ -9,6 +9,19 @@ import getpass
 # 集群中各台机器的root密码
 root_password = getpass.getpass('root password: ')
 
+# 取第一个位置作为配置环境变量的位置（可能在多处下载并解压了hadoop）
+command_location = commands.getoutput(
+    'find / -name hadoop-daemons.sh').split(r'\n')[0]
+
+if len(command_location) <= 0:
+    print('you did not download hadoop package or decompose it')
+    os._exit(1)
+
+hadoop_location_index = command_location.rfind(
+    r'/', 0, command_location.rfind(r'/'))
+# hadoop的解压位置
+hadoop_location = command_location[:hadoop_location_index]
+
 with open('/etc/hosts', mode='r') as file:
     for line in file:
         ip_name = line.strip().split()
@@ -50,12 +63,13 @@ with open('/etc/hosts', mode='r') as file:
         # 配置hadoop的环境
         ssh.exec_command("echo -e '\n# 配置hadoop环境' >> /etc/profile")
         ssh.exec_command(
-            "echo 'export HADOOP_HOME=/opt/hadoop-2.8.5' >> /etc/profile")
+            "echo 'export HADOOP_HOME={hadoop_location}' >> /etc/profile".format(hadoop_location=hadoop_location))
         ssh.exec_command(
             "echo 'export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH' >> /etc/profile")
 
         # 使配置的环境生效
         _, stdout, _ = ssh.exec_command('source /etc/profile')
+        stdout.channel.recv_exit_status()
 
         # 退出ssh连接
         ssh.close()
