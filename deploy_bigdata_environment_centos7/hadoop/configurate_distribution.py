@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-12 09:21:03
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-15 16:33:48
+# @Last Modified time: 2019-07-16 10:28:35
 # @Description:        distribute the hadoop environment to each machine in clusters
 
 import os
@@ -11,6 +11,9 @@ import socket
 import paramiko
 import getpass
 import commands
+
+# 集群中各台机器的root密码
+root_password = getpass.getpass('root password: ')
 
 # 获取当前配置的hadoop环境变量
 hadoop_home = commands.getoutput('echo ${HADOOP_HOME}')
@@ -32,9 +35,6 @@ os.system(
 hostname = socket.gethostname()
 m_ip = socket.gethostbyname(hostname)
 
-# 集群中各台机器的root密码
-root_password = getpass.getpass('root password: ')
-
 with open('/etc/hosts', mode='r') as file:
     for line in file:
         ip_name = line.strip().split()
@@ -46,6 +46,8 @@ with open('/etc/hosts', mode='r') as file:
 
         if ip == m_ip:
             continue
+
+        print('ip =', ip, 'm_ip =', m_ip)
 
         # 创建ssh对象
         ssh = paramiko.SSHClient()
