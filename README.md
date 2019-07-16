@@ -14,8 +14,8 @@ some useful scripts
       1. download the archive file *hadoop-version*  and decompose it
       2. configure what you want to configure，maybe you have to pay attention to the following files:
          - *hadoop-version*/etc/hadoop/hadoop-env.sh
-           - *export JAVA_HOME=*java_location
-         - *hadoop-version/*etc/hadoop/core-site.xml
+           - export *JAVA_HOME*=java_location
+         - *hadoop-version*/etc/hadoop/core-site.xml
          - *hadoop-version*/etc/hadoop/hdfs-site.xml
          - *hadoop-version*/etc/hadoop/slaves
       3. run **add_system_env_path.py**: this script will do the followings:
