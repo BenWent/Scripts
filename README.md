@@ -8,7 +8,8 @@ some useful scripts
 1. prerequisites:
    1. pip install paramiko：Paramiko is a Python (2.7, 3.4+) implementation of the SSHv2 protocol [[1\]](http://www.paramiko.org/#id2), providing both client and server functionality.While it leverages a Python C extension for low level cryptography ([Cryptography](https://cryptography.io/)), Paramiko itself is a pure Python interface around SSH networking concepts.
    2. pip install configparser：used to parse the configuration file *add_new_node_config.ini*
-
+3. pip install tqdm：set progress
+   
 2. documents
    1. to use these scripts, you need to do following preparations:
       1. download the archive file *hadoop-version*  and decompose it
