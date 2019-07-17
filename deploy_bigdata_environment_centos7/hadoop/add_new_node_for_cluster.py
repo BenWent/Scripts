@@ -3,7 +3,7 @@
 # @Author: ben
 # @Date:   2019-07-13 16:49:33
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-15 22:23:57
+# @Last Modified time: 2019-07-17 11:31:21
 # @Description:        向hadoop集群中添加新的节点
 
 import os
@@ -15,6 +15,7 @@ import crypt
 import time
 import socket
 import configparser
+from tqdm import tqdm
 
 
 def set_login_without_passward(src_ip, dst_ip, password):
@@ -83,13 +84,19 @@ if __name__ == '__main__':
 
     # 添加路由
     with open('/etc/hosts', mode='r') as file:
-        for line in file:
+        # 设置进度条
+        bar = tqdm(list(file), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+
+        for line in bar:
             fragments = line.strip().split()
             if len(fragments) != 2:
                 continue
 
             _ip = fragments[0]
             _hostname = fragments[1]
+
+            # 设置进度条提示
+            bar.set_description('add router info for {ip}'.format(ip=_ip))
 
             # 以root身份ssh登录到其它机器
             client = paramiko.SSHClient()
@@ -115,7 +122,12 @@ if __name__ == '__main__':
             os.system("echo -e '{machine_ip}\t{machine_name}' >> ./hosts.tmp".format(
                 machine_name=_hostname, machine_ip=_ip))
 
-    for index, ip in enumerate(ip_list):
+    # 设置进度条
+    bar = tqdm(ip_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+    for index, ip in enumerate(bar):
+        # 设置进度条提示
+        bar.set_description('configurating for {ip}'.format(ip=ip))
+
         name = hostnames[index]
 
         # 为运行该脚本的节点单独添加新增节点的路由
@@ -238,7 +250,10 @@ if __name__ == '__main__':
 
     # 新增节点与集群节点间SSH互信
     with open('/etc/hosts', mode='r') as file:
-        for line in file:
+        # 设置进度条
+        bar = tqdm(list(file), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+
+        for line in bar:
             ip_name = line.strip().split()
 
             if len(ip_name) != 2:
@@ -247,10 +262,20 @@ if __name__ == '__main__':
             _ip = ip_name[0]
 
             for ip in ip_list:
+                # 设置进度条提示
+                bar.set_description(
+                    '{ip} authenticates {_ip}'.format(ip=ip, _ip=_ip))
+
                 set_login_without_passward(_ip, ip, password)
                 set_login_without_passward(ip, _ip, password)
 
-    for ip in ip_list:
+    # 设置进度条
+    bar = tqdm(ip_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+
+    for ip in bar:
+        # 设置进度条提示
+        bar.set_description('staring processes in {ip}'.format(ip=ip))
+
         # 在新节点上启动DatanodeManager进行
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

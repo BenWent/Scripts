@@ -3,11 +3,12 @@
 # @Author: ben
 # @Date:   2019-07-14 18:33:43
 # @Last Modified by:   ben
-# @Last Modified time: 2019-07-15 10:04:55
+# @Last Modified time: 2019-07-17 11:18:33
 # @Description: 	   移除集群中的指定用户
 
 import paramiko
 import getpass
+from tqdm import tqdm
 
 # 待移除的用户
 user = input('user:')
@@ -15,13 +16,19 @@ user = input('user:')
 root_password = getpass.getpass('root password:')
 
 with open('/etc/hosts', mode='r') as file:
-    for line in file:
+    # 设置进度条
+    bar = tqdm(list(file), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+
+    for line in bar:
         ip_name = line.strip().split()
         # print(ip_name)
         if len(ip_name) != 2:
             continue
 
         ip = ip_name[0]
+
+        # 设置进度条提示
+        bar.set_description('removing for {ip}'.format(ip=ip))
 
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

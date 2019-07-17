@@ -4,6 +4,7 @@ import os
 import commands
 import paramiko
 import getpass
+from tqdm import tqdm
 
 
 # 集群中各台机器的root密码
@@ -23,13 +24,19 @@ hadoop_location_index = command_location.rfind(
 hadoop_location = command_location[:hadoop_location_index]
 
 with open('/etc/hosts', mode='r') as file:
-    for line in file:
+    # 设置进度条
+    bar = tqdm(list(file), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}')
+
+    for line in bar:
         ip_name = line.strip().split()
         # print(ip_name)
         if len(ip_name) != 2:
             continue
 
         ip = ip_name[0]
+
+        # 设置进度条提示
+        bar.set_description('configurating for {ip}'.format(ip=ip))
 
         # 创建ssh对象
         ssh = paramiko.SSHClient()
